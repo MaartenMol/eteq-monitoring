@@ -95,7 +95,7 @@ services:
     networks:
       - traefik_traefik
     command:
-      - '--haproxy.scrape-uri="http://10.0.1.146/haproxy?stats;csv"'
+      - '--haproxy.scrape-uri=http://10.0.1.146/haproxy?stats;csv'
     deploy:
       mode: replicated
       replicas: 1
