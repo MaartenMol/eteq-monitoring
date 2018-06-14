@@ -69,6 +69,12 @@ services:
       placement:
         constraints:
           - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=alertmanager"
+        - "traefik.frontend.rule=Host:alerts.vsphere.local"
+        - "traefik.docker.network=traefik_traefik"
+        - "traefik.port=9093"
 
   node-exporter:
     image: prom/node-exporter:latest

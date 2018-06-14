@@ -7,5 +7,5 @@ receivers:
           - send_resolved: true
             text: "{{ .CommonAnnotations.description }}"
             username: 'Prometheus'
-            channel: 'eteq'
+            channel: 'hosted_eteq'
             api_url: 'https://hooks.slack.com/services/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'
