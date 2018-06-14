@@ -74,7 +74,7 @@ services:
           - node.role == manager
 
   node-exporter:
-    image: stefanprodan/swarmprom-node-exporter:v0.15.2
+    image: node_memory_MemTotal
     networks:
       - traefik_traefik
     environment:
