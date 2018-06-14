@@ -26,7 +26,7 @@ services:
       mode: global
 
   grafana:
-    image: stefanprodan/swarmprom-grafana:5.0.1
+    image: grafana/grafana:5.1.3
     networks:
       - traefik_traefik
     environment:
@@ -54,7 +54,7 @@ services:
       retries: 5
 
   alertmanager:
-    image: stefanprodan/swarmprom-alertmanager:v0.14.0
+    image: prom/alertmanager:v0.14.0
     networks:
       - traefik_traefik
     environment:
@@ -64,7 +64,8 @@ services:
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
-    volumes:
+    volumes: 
+      - ./alertmanager/:/etc/alertmanager/
       - alertmanager:/alertmanager
     deploy:
       mode: replicated
