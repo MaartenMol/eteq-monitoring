@@ -82,6 +82,8 @@ services:
       - traefik_traefik
     environment:
       - NODE_ID={{.Node.ID}}
+    ports:
+      - 9100:9100
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
