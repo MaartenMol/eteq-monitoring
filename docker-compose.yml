@@ -1,38 +1,20 @@
 version: "3.3"
 
 networks:
-  net:
-    driver: overlay
-    attachable: true
+  traefik_traefik:
+    external:
+      name: traefik_traefik
 
 volumes:
     prometheus: {}
     grafana: {}
     alertmanager: {}
 
-configs:
-  caddy_config:
-    file: ./caddy/Caddyfile
-  dockerd_config:
-    file: ./dockerd-exporter/Caddyfile
-
 services:
-  dockerd-exporter:
-    image: stefanprodan/caddy
-    networks:
-      - net
-    environment:
-      - DOCKER_GWBRIDGE_IP=172.18.0.1
-    configs:
-      - source: dockerd_config
-        target: /etc/caddy/Caddyfile
-    deploy:
-      mode: global
-
   cadvisor:
     image: google/cadvisor
     networks:
-      - net
+      - traefik_traefik
     command: -logtostderr -docker_only
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -46,7 +28,7 @@ services:
   grafana:
     image: stefanprodan/swarmprom-grafana:5.0.1
     networks:
-      - net
+      - traefik_traefik
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=P@ssword
@@ -59,11 +41,22 @@ services:
       placement:
         constraints:
           - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=grafana"
+        - "traefik.frontend.rule=Host:grafana.vsphere.local"
+        - "traefik.docker.network=traefik_traefik"
+        - "traefik.port=3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
 
   alertmanager:
     image: stefanprodan/swarmprom-alertmanager:v0.14.0
     networks:
-      - net
+      - traefik_traefik
     environment:
       - SLACK_URL=https://hooks.slack.com/services/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
       - SLACK_CHANNEL=eteq
@@ -79,26 +72,11 @@ services:
       placement:
         constraints:
           - node.role == manager
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-
-  unsee:
-    image: cloudflare/unsee:v0.8.0
-    networks:
-      - net
-    environment:
-      - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
-    deploy:
-      mode: replicated
-      replicas: 1
 
   node-exporter:
     image: stefanprodan/swarmprom-node-exporter:v0.15.2
     networks:
-      - net
+      - traefik_traefik
     environment:
       - NODE_ID={{.Node.ID}}
     volumes:
@@ -118,7 +96,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.2.1
     networks:
-      - net
+      - traefik_traefik
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -135,35 +113,9 @@ services:
       placement:
         constraints:
           - node.role == manager
-
-  caddy:
-    image: stefanprodan/caddy
-    ports:
-      - "3000:3000"
-      - "9090:9090"
-      - "9093:9093"
-      - "9094:9094"
-    networks:
-      - net
-    environment:
-      - ADMIN_USER=admin
-      - ADMIN_PASSWORD=P@ssword
-    configs:
-      - source: caddy_config
-        target: /etc/caddy/Caddyfile
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 5s
-      timeout: 1s
-      retries: 5
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=prometheus"
+        - "traefik.frontend.rule=Host:prom.vsphere.local"
+        - "traefik.docker.network=traefik_traefik"
+        - "traefik.port=9090"
