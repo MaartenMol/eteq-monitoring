@@ -1,9 +1,8 @@
 global:
   scrape_interval:     15s
   evaluation_interval: 15s
-
   external_labels:
-    monitor: 'promswarm'
+    monitor: 'eteq-monitoring'
 
 rule_files:
   - "swarm_node.rules.yml"
@@ -19,6 +18,21 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+
+  - job_name: 'traefik'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['traefik:8080']
+
+  - job_name: 'haproxy'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['haproxy-exporter:9101']
+
+  - job_name: 'postgres'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['postgres-exporter:9187']
 
   - job_name: 'cadvisor'
     dns_sd_configs:

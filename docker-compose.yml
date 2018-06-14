@@ -90,6 +90,32 @@ services:
     deploy:
       mode: global
 
+  haproxy-exporter:
+    image: quay.io/prometheus/haproxy-exporter:v0.9.0
+    networks:
+      - traefik_traefik
+    command:
+      - '--haproxy.scrape-uri="http://10.0.1.146/haproxy?stats;csv"'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  postgres-exporter:
+    image: wrouesnel/postgres_exporter
+    networks:
+      - traefik_traefik
+    environment:
+      - DATA_SOURCE_NAME="postgresql://postgres:secretpassword@10.0.1.141:5432/?sslmode=disable"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
   prometheus:
     image: prom/prometheus:v2.2.1
     networks:
