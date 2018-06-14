@@ -57,10 +57,6 @@ services:
     image: prom/alertmanager:v0.14.0
     networks:
       - traefik_traefik
-    environment:
-      - SLACK_URL=https://hooks.slack.com/services/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
-      - SLACK_CHANNEL=eteq
-      - SLACK_USER=alertmanager
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
