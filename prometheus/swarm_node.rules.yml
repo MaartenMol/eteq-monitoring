@@ -7,8 +7,8 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: Node Down '{{ $labels.node_name }}'!
-      description: The node '{{ $labels.node_name }}' is down for more than 30 seconds.
+      summary: Node Down {{$labels.instance}}!
+      description: The node {{$labels.instance}} is down for more than 30 seconds.
 
   - alert: node_cpu_usage
     expr: 100 - (avg(irate(node_cpu{mode="idle"}[1m]) * ON(instance) GROUP_LEFT(node_name)
