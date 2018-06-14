@@ -15,12 +15,6 @@ configs:
     file: ./caddy/Caddyfile
   dockerd_config:
     file: ./dockerd-exporter/Caddyfile
-  node_rules:
-    file: ./prometheus/rules/swarm_node.rules.yml
-  task_rules:
-    file: ./prometheus/rules/swarm_task.rules.yml
-  prom_config:
-    file: ./prometheus/conf/prometheus.yml
 
 services:
   dockerd-exporter:
@@ -122,24 +116,19 @@ services:
       mode: global
 
   prometheus:
-    image: stefanprodan/swarmprom-prometheus:v2.2.0-rc.0
+    image: prom/prometheus:v2.2.1
     networks:
       - net
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention=24h'
+      - '--storage.tsdb.retention=12600h'
+      - '--web.enable-lifecycle'
     volumes:
       - prometheus:/prometheus
-    configs:
-      - source: node_rules
-        target: /etc/prometheus/swarm_node.rules.yml
-      - source: task_rules
-        target: /etc/prometheus/swarm_task.rules.yml
-      - source: prom_config
-        target: /etc/prometheus/prometheus.yml
+      - ./prometheus:/etc/prometheus/
     deploy:
       mode: replicated
       replicas: 1
