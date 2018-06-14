@@ -138,7 +138,7 @@ services:
         target: /etc/prometheus/swarm_node.rules.yml
       - source: task_rules
         target: /etc/prometheus/swarm_task.rules.yml
-      - source: prom_conf
+      - source: prom_config
         target: /etc/prometheus/prometheus.yml
     deploy:
       mode: replicated
